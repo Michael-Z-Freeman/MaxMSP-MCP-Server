@@ -48,21 +48,36 @@ class MaxMSPConnection:
         await self.sio.emit("command", cmd, namespace=self.namespace)
         logging.info(f"Sent to MaxMSP: {cmd}")
 
-    async def send_request(self, payload: dict, timeout=2.0):
-        """Send a fetch request to MaxMSP."""
+    async def send_request(self, payload: dict, timeout=5.0):
+        """Send a fetch request to MaxMSP with enhanced error handling."""
         request_id = str(uuid.uuid4())
         future = asyncio.get_event_loop().create_future()
         self._pending[request_id] = future
 
         payload.update({"request_id": request_id})
-        await self.sio.emit("request", payload, namespace=self.namespace)
-        logging.info(f"Request to MaxMSP: {payload}")
 
         try:
+            await self.sio.emit("request", payload, namespace=self.namespace)
+            logging.info(f"Request to MaxMSP: {payload}")
+
             response = await asyncio.wait_for(future, timeout)
+
+            # Check if response indicates a warning (e.g., truncated large patch)
+            if isinstance(response, dict) and "warning" in response:
+                logging.warning(f"MaxMSP warning: {response['warning']}")
+
             return response
+
         except asyncio.TimeoutError:
-            raise TimeoutError(f"No response received in {timeout} seconds.")
+            logging.error(f"Request timeout after {timeout}s for action: {payload.get('action', 'unknown')}")
+            # For large patch requests, suggest the issue might be patch size
+            if payload.get("action") in ["get_objects_in_patch", "get_objects_in_selected"]:
+                raise TimeoutError(f"Request timed out after {timeout}s. If working with a large patch, this may indicate the patch is too complex to process safely. Consider working with smaller sections.")
+            else:
+                raise TimeoutError(f"No response received in {timeout} seconds.")
+        except Exception as e:
+            logging.error(f"Error sending request to MaxMSP: {e}")
+            raise
         finally:
             self._pending.pop(request_id, None)
 
