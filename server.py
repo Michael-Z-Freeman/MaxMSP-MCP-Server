@@ -444,5 +444,49 @@ async def get_avoid_rect_position(ctx: Context):
     return response
 
 
+@mcp.tool()
+async def get_console_errors(ctx: Context):
+    """Retrieve console error messages captured from Max MSP.
+
+    Returns:
+        dict: A dictionary containing:
+            - errors: List of error objects with timestamp, message, and source
+            - count: Total number of errors captured
+    """
+    maxmsp = ctx.request_context.lifespan_context.get("maxmsp")
+
+    # Generate unique request ID
+    request_id = str(uuid.uuid4())
+
+    # Use Socket.IO event directly instead of send_request
+    await maxmsp.sio.emit("get_console_errors", {"request_id": request_id}, namespace=maxmsp.namespace)
+
+    # Wait for response
+    future = asyncio.Future()
+    maxmsp._pending[request_id] = future
+
+    try:
+        response = await asyncio.wait_for(future, timeout=5.0)
+        return response
+    except asyncio.TimeoutError:
+        maxmsp._pending.pop(request_id, None)
+        return {"error": "Timeout waiting for console errors response"}
+
+
+@mcp.tool()
+async def clear_console_errors(ctx: Context):
+    """Clear all captured console error messages from Max MSP.
+
+    Returns:
+        str: Confirmation message that errors have been cleared
+    """
+    maxmsp = ctx.request_context.lifespan_context.get("maxmsp")
+
+    # Use Socket.IO event directly
+    await maxmsp.sio.emit("clear_console_errors", {}, namespace=maxmsp.namespace)
+
+    return "Console errors cleared successfully"
+
+
 if __name__ == "__main__":
     mcp.run()
