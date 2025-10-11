@@ -4,11 +4,13 @@ from contextlib import asynccontextmanager
 import asyncio
 import socketio
 
-from typing import Callable, Any
+from typing import Any
 import logging
 import uuid
 import os
 import json
+from pathlib import Path
+from typing import Optional
 
 SOCKETIO_SERVER_URL = os.environ.get("SOCKETIO_SERVER_URL", "http://127.0.0.1")
 SOCKETIO_SERVER_PORT = os.environ.get("SOCKETIO_SERVER_PORT", "5002")
@@ -24,6 +26,120 @@ for obj_list in docs.values():
         flattened_docs[obj["name"]] = obj
 
 io_server_started = False
+
+TAGGED_VAR_PREFIX = os.environ.get("MAXMCP_CLIENT_TAG_PREFIX", "maxmcpid")
+if not TAGGED_VAR_PREFIX.endswith("-"):
+    TAGGED_VAR_PREFIX = f"{TAGGED_VAR_PREFIX}-"
+
+DEFAULT_PATCH_PATH = os.environ.get(
+    "MAXMCP_PATCH_PATH",
+    os.path.join(current_dir, "MaxMSP_Agent", "demo.maxpat"),
+)
+
+INCLUDE_TAGGED_DEFAULT = os.environ.get("MAXMCP_INCLUDE_TAGGED", "").lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
+
+
+def resolve_patch_path(patch_path: Optional[str]) -> Optional[Path]:
+    """Resolve the Max patch path used for tagged object introspection."""
+    candidate = Path(patch_path) if patch_path else Path(DEFAULT_PATCH_PATH)
+    if not candidate.exists():
+        logging.warning(
+            "Tagged object introspection requested but patch path '%s' is missing",
+            candidate,
+        )
+        return None
+    return candidate
+
+
+def _collect_tagged_boxes(patcher: dict, accumulator: list[dict]) -> None:
+    """Recursively collect boxes with tagged varnames from a patcher tree."""
+    boxes = patcher.get("boxes", []) or []
+    for box_wrapper in boxes:
+        box = box_wrapper.get("box", {})
+        varname = box.get("varname")
+        if isinstance(varname, str) and varname.startswith(TAGGED_VAR_PREFIX):
+            normalized_box = {
+                "maxclass": box.get("maxclass"),
+                "varname": varname,
+                "patching_rect": box.get("patching_rect"),
+            }
+            if "text" in box:
+                normalized_box["text"] = box["text"]
+            accumulator.append({"box": normalized_box})
+
+        nested = box.get("patcher")
+        if isinstance(nested, dict):
+            _collect_tagged_boxes(nested, accumulator)
+
+
+def load_tagged_boxes_from_patch(patch_path: Path) -> list[dict]:
+    """Load tagged boxes directly from the patch file for dev introspection."""
+    cache_key = str(patch_path)
+    tagged_box_cache = load_tagged_boxes_from_patch.cache  # type: ignore[attr-defined]
+    try:
+        mtime = patch_path.stat().st_mtime
+    except OSError as exc:  # pragma: no cover - filesystem edge cases
+        logging.error("Failed to stat patch '%s': %s", patch_path, exc)
+        return []
+
+    cached_entry = tagged_box_cache.get(cache_key)
+    if cached_entry and cached_entry["mtime"] == mtime:
+        return cached_entry["boxes"]
+
+    try:
+        with patch_path.open("r", encoding="utf-8") as patch_file:
+            patch_data = json.load(patch_file)
+    except Exception as exc:  # pragma: no cover - file access issues
+        logging.error("Failed to read patch '%s': %s", patch_path, exc)
+        return []
+
+    root_patcher = patch_data.get("patcher")
+    if not isinstance(root_patcher, dict):
+        logging.warning(
+            "Tagged object introspection failed: root patcher missing in %s",
+            patch_path,
+        )
+        return []
+
+    tagged_boxes: list[dict] = []
+    _collect_tagged_boxes(root_patcher, tagged_boxes)
+    tagged_box_cache[cache_key] = {"mtime": mtime, "boxes": tagged_boxes}
+    return tagged_boxes
+
+
+load_tagged_boxes_from_patch.cache = {}  # type: ignore[attr-defined]
+
+
+def merge_tagged_into_response(response: dict, tagged_boxes: list[dict]) -> dict:
+    """Merge tagged objects into the existing patch response."""
+    if not tagged_boxes:
+        return response
+
+    existing_boxes = response.setdefault("boxes", [])
+    existing_varnames = {
+        box.get("box", {}).get("varname")
+        for box in existing_boxes
+        if isinstance(box, dict)
+    }
+
+    new_boxes = [
+        box for box in tagged_boxes if box["box"].get("varname") not in existing_varnames
+    ]
+    if not new_boxes:
+        return response
+
+    existing_boxes.extend(new_boxes)
+    metadata = response.setdefault("metadata", {})
+    metadata["tagged_boxes_injected"] = metadata.get("tagged_boxes_injected", 0) + len(
+        new_boxes
+    )
+    metadata["tagged_box_source"] = "local_patch_file"
+    return response
 
 
 class MaxMSPConnection:
@@ -373,6 +489,8 @@ def get_object_doc(ctx: Context, object_name: str) -> dict:
 @mcp.tool()
 async def get_objects_in_patch(
     ctx: Context,
+    include_tagged: Optional[bool] = None,
+    patch_path: Optional[str] = None,
 ):
     """Retrieve the list of existing objects in the current Max patch.
 
@@ -384,17 +502,29 @@ async def get_objects_in_patch(
 
     Returns:
         list: A list of objects and patch cords.
+    Args:
+        include_tagged: When True, merge in objects tagged with the filtered
+            prefix from the on-disk patch file. Defaults to environment
+            variable `MAXMCP_INCLUDE_TAGGED`.
+        patch_path: Override path to the Max patch used for tagged lookups.
     """
     maxmsp = ctx.request_context.lifespan_context.get("maxmsp")
     payload = {"action": "get_objects_in_patch"}
     response = await maxmsp.send_request(payload)
-
+    should_include_tagged = INCLUDE_TAGGED_DEFAULT if include_tagged is None else include_tagged
+    if should_include_tagged and isinstance(response, dict):
+        resolved_path = resolve_patch_path(patch_path)
+        if resolved_path:
+            tagged_boxes = load_tagged_boxes_from_patch(resolved_path)
+            response = merge_tagged_into_response(response, tagged_boxes)
     return [response]
 
 
 @mcp.tool()
 async def get_objects_in_selected(
     ctx: Context,
+    include_tagged: Optional[bool] = None,
+    patch_path: Optional[str] = None,
 ):
     """Retrieve the list of objects that is selected in a (unlocked) patcher window.
 
@@ -402,11 +532,21 @@ async def get_objects_in_selected(
 
     Returns:
         list: A list of objects and patch cords.
+    Args:
+        include_tagged: When True, merge in objects tagged with the filtered
+            prefix from the on-disk patch file. Defaults to environment
+            variable `MAXMCP_INCLUDE_TAGGED`.
+        patch_path: Override path to the Max patch used for tagged lookups.
     """
     maxmsp = ctx.request_context.lifespan_context.get("maxmsp")
     payload = {"action": "get_objects_in_selected"}
     response = await maxmsp.send_request(payload)
-
+    should_include_tagged = INCLUDE_TAGGED_DEFAULT if include_tagged is None else include_tagged
+    if should_include_tagged and isinstance(response, dict):
+        resolved_path = resolve_patch_path(patch_path)
+        if resolved_path:
+            tagged_boxes = load_tagged_boxes_from_patch(resolved_path)
+            response = merge_tagged_into_response(response, tagged_boxes)
     return [response]
 
 
