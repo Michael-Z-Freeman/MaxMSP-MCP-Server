@@ -1,14 +1,12 @@
 
 autowatch = 1; // 1
-inlets = 2; // inlet 0: network messages, inlet 1: console error messages
+inlets = 1; // inlet 0: network messages
 outlets = 3; // For status, responses, etc.
 
 var p = this.patcher
 var obj_count = 0;
 var boxes = [];
 var lines = [];
-var console_errors = [];
-var max_error_history = 100;
 
 function safe_parse_json(str) {
     try {
@@ -30,13 +28,6 @@ function split_long_string(inString, maxLength) {
 
 // Called when a message arrives at inlet 0 (from [udpreceive] or similar)
 function anything() {
-    if (inlet == 1) {
-        // Handle console error messages from inlet 1
-        var error_msg = arrayfromargs(messagename, arguments).join(" ");
-        capture_console_error(error_msg);
-        return;
-    }
-
     var msg = arrayfromargs(messagename, arguments).join(" ");
     var data = safe_parse_json(msg);
     if (!data) return;
@@ -129,16 +120,6 @@ function anything() {
             if (data.varname && data.num) {
                 set_number(data.varname, data.num);
             }
-            break;
-        case "get_console_errors":
-            if (data.request_id) {
-                get_console_errors(data.request_id);
-            } else {
-                outlet(0, "error", "Missing request_id for get_console_errors");
-            }
-            break;
-        case "clear_console_errors":
-            clear_console_errors();
             break;
         default:
             outlet(0, "error", "Unknown action: " + data.action);
@@ -557,45 +538,4 @@ function parsed_patcher() {
 
     var parsed_patcher = JSON.parse(lines);
 	// post(JSON.stringify(parsed_patcher));
-}
-
-function capture_console_error(error_msg) {
-    var timestamp = new Date().toISOString();
-    var error_entry = {
-        timestamp: timestamp,
-        message: error_msg,
-        source: "max_console"
-    };
-
-    console_errors.push(error_entry);
-
-    if (console_errors.length > max_error_history) {
-        console_errors.shift();
-    }
-
-    outlet(0, "console_error", JSON.stringify(error_entry));
-}
-
-function get_console_errors(request_id) {
-    try {
-        var results = {
-            "request_id": request_id,
-            "results": {
-                "errors": console_errors,
-                "count": console_errors.length
-            }
-        };
-        outlet(1, "response", JSON.stringify(results, null, 0));
-    } catch (e) {
-        var error_results = {
-            "request_id": request_id,
-            "results": {"error": "Failed to get console errors: " + e.message}
-        };
-        outlet(1, "response", JSON.stringify(error_results, null, 0));
-    }
-}
-
-function clear_console_errors() {
-    console_errors = [];
-    outlet(0, "info", "Console errors cleared");
 }
