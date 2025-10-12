@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 34.0, 121.0, 922.0, 745.0 ],
+		"rect" : [ 34.0, 121.0, 1372.0, 745.0 ],
 		"gridsize" : [ 15.0, 15.0 ],
 		"showrootpatcherontab" : 0,
 		"showontab" : 0,
@@ -45,7 +45,7 @@
 					"color" : [ 0.865085244178772, 0.586760640144348, 0.054060600697994, 1.0 ],
 					"id" : "obj-7",
 					"maxclass" : "newobj",
-					"numinlets" : 2,
+					"numinlets" : 1,
 					"numoutlets" : 3,
 					"outlettype" : [ "", "", "" ],
 					"patching_rect" : [ 568.0, 256.0, 85.0, 22.0 ],
@@ -76,12 +76,12 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 34.0, 147.0, 922.0, 719.0 ],
+						"rect" : [ 34.0, 147.0, 1372.0, 719.0 ],
 						"gridsize" : [ 15.0, 15.0 ],
 						"showontab" : 2,
 						"boxes" : [ 							{
 								"box" : 								{
-									"bgmode" : 0,
+									"bgmode" : 1,
 									"border" : 0,
 									"clickthrough" : 0,
 									"enablehscroll" : 0,
@@ -359,7 +359,7 @@
 									"color" : [ 0.905882352941176, 0.709803921568627, 0.341176470588235, 1.0 ],
 									"id" : "obj-7",
 									"maxclass" : "newobj",
-									"numinlets" : 2,
+									"numinlets" : 1,
 									"numoutlets" : 3,
 									"outlettype" : [ "", "", "" ],
 									"patching_rect" : [ 1057.8125, 700.0, 85.0, 22.0 ],
@@ -488,7 +488,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 922.0, 719.0 ],
+						"rect" : [ 0.0, 26.0, 1372.0, 719.0 ],
 						"gridsize" : [ 15.0, 15.0 ],
 						"showontab" : 2,
 						"boxes" : [ 							{
@@ -3787,6 +3787,8 @@
 									"saved_object_attributes" : 									{
 										"autostart" : 0,
 										"defer" : 0,
+										"node_bin_path" : "",
+										"npm_bin_path" : "",
 										"watch" : 0
 									}
 ,
@@ -3882,6 +3884,13 @@
 				"bootpath" : "/Volumes/RecordBoxNVMe/ReturnToTheSource/MaxMSP-MCP-Server/MaxMSP_Agent",
 				"patcherrelativepath" : ".",
 				"type" : "TEXT",
+				"implicit" : 1
+			}
+, 			{
+				"name" : "retain-dictionaries.maxpat",
+				"bootpath" : "/Volumes/RecordBoxNVMe/ReturnToTheSource/MaxMSP-MCP-Server/MaxMSP_Agent",
+				"patcherrelativepath" : ".",
+				"type" : "JSON",
 				"implicit" : 1
 			}
  ],
