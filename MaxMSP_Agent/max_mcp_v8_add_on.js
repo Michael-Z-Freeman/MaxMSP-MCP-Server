@@ -33,8 +33,8 @@ function anything() {
             add_boxtext(arguments[0], arguments[1]);
             break;
         default:
-            // outlet(1, messagename, ...arguments);
-            outlet(1, "response", arguments[1]);
+            outlet(1, messagename, ...arguments);
+            // outlet(1, "response", arguments[1]);
     }
 }
 

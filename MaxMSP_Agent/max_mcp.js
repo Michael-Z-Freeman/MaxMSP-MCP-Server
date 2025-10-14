@@ -1,7 +1,7 @@
 
 autowatch = 1; // 1
 inlets = 1; // inlet 0: network messages
-outlets = 3; // For status, responses, etc.
+outlets = 4; // For status, responses, etc.
 
 var p = this.patcher
 var obj_count = 0;
@@ -30,7 +30,10 @@ function split_long_string(inString, maxLength) {
 function anything() {
     var msg = arrayfromargs(messagename, arguments).join(" ");
     var data = safe_parse_json(msg);
-    if (!data) return;
+    if (!data) {
+        outlet(3, "console_message", msg);
+        return;
+    }
 
     switch (data.action) {
         case "fetch_test":

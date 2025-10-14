@@ -31,6 +31,10 @@ Max.addHandler("response", async (...msg) => {
 	// await Max.post(`Sent response: ${JSON.stringify(data)}`);
 });
 
+Max.addHandler("console_message", async (msg) => {
+    await io.of(NAMESPACE).emit("console_message", msg);
+});
+
 Max.addHandler("port", async (msg) => {
   Max.post(`msg ${msg}`);
   if (msg > 0 && msg < 65536) {

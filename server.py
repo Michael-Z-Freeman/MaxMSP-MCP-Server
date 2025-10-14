@@ -151,6 +151,11 @@ class MaxMSPConnection:
 
         self.sio = socketio.AsyncClient()
         self._pending = {}  # fetch requests that are not yet completed
+        self.console_messages = []
+
+        @self.sio.on("console_message", namespace=self.namespace)
+        async def _on_console_message(data):
+            self.console_messages.append(data)
 
         @self.sio.on("response", namespace=self.namespace)
         async def _on_response(data):
@@ -582,6 +587,19 @@ async def get_avoid_rect_position(ctx: Context):
     response = await maxmsp.send_request(payload)
 
     return response
+
+
+@mcp.tool()
+async def get_max_console_messages(ctx: Context) -> list:
+    """Retrieve the list of messages from the Max console.
+
+    Returns:
+        list: A list of messages from the Max console.
+    """
+    maxmsp = ctx.request_context.lifespan_context.get("maxmsp")
+    messages = maxmsp.console_messages.copy()
+    maxmsp.console_messages.clear()
+    return messages
 
 
 if __name__ == "__main__":
