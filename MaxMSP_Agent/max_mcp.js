@@ -7,6 +7,8 @@ var p = this.patcher
 var obj_count = 0;
 var boxes = [];
 var lines = [];
+var connection_count = 0;
+var MAX_CONNECTIONS = 500;
 
 function safe_parse_json(str) {
     try {
@@ -244,12 +246,11 @@ function get_objects_in_patch(request_id) {
     obj_count = 0;
     boxes = [];
     lines = [];
+    connection_count = 0;
 
     // Much more aggressive safety limits to prevent JavaScript engine crashes
     var MAX_OBJECTS = 200;
-    var MAX_CONNECTIONS = 500;
     var object_limit_reached = false;
-    var connection_count = 0;
 
     try {
         p.applydeep(function(obj) {
@@ -291,12 +292,11 @@ function get_objects_in_selected(request_id) {
     obj_count = 0;
     boxes = [];
     lines = [];
+    connection_count = 0;
 
     // Much more aggressive safety limits to prevent JavaScript engine crashes
     var MAX_OBJECTS = 200;
-    var MAX_CONNECTIONS = 500;
     var object_limit_reached = false;
-    var connection_count = 0;
 
     try {
         p.applydeepif(function(obj) {
