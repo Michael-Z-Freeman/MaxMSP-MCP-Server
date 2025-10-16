@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 33.0, 121.0, 1372.0, 745.0 ],
+		"rect" : [ 34.0, 93.0, 922.0, 773.0 ],
 		"gridsize" : [ 15.0, 15.0 ],
 		"showrootpatcherontab" : 0,
 		"showontab" : 0,
@@ -76,17 +76,18 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 33.0, 147.0, 1372.0, 719.0 ],
+						"rect" : [ 34.0, 119.0, 922.0, 747.0 ],
 						"gridsize" : [ 15.0, 15.0 ],
 						"showontab" : 2,
 						"boxes" : [ 							{
 								"box" : 								{
-									"id" : "obj-8",
+									"id" : "obj-5",
 									"maxclass" : "newobj",
 									"numinlets" : 0,
 									"numoutlets" : 0,
-									"patching_rect" : [ 367.600000000000023, 340.79000000000002, 29.0, 22.0 ],
-									"text" : "fred"
+									"patching_rect" : [ 372.569999999999993, 473.949999999999989, 29.0, 22.0 ],
+									"text" : "fred",
+									"varname" : "obj-9"
 								}
 
 							}
@@ -99,7 +100,8 @@
 									"numoutlets" : 3,
 									"outlettype" : [ "", "", "int" ],
 									"patching_rect" : [ 1172.0, 600.0, 193.0, 35.0 ],
-									"text" : "console @patcherfilter thispatcher @showonlyerrors 1"
+									"text" : "console @patcherfilter thispatcher @showonlyerrors 0",
+									"varname" : "obj-8"
 								}
 
 							}
@@ -382,17 +384,18 @@
 								"box" : 								{
 									"color" : [ 0.905882352941176, 0.709803921568627, 0.341176470588235, 1.0 ],
 									"id" : "obj-7",
+									"linecount" : 3,
 									"maxclass" : "newobj",
 									"numinlets" : 1,
 									"numoutlets" : 4,
 									"outlettype" : [ "", "", "", "" ],
-									"patching_rect" : [ 1057.8125, 700.0, 85.0, 22.0 ],
+									"patching_rect" : [ 1057.8125, 700.0, 301.0, 49.0 ],
 									"saved_object_attributes" : 									{
-										"filename" : "max_mcp.js",
+										"filename" : "/Volumes/RecordBoxNVMe/ReturnToTheSource/MaxMSP-MCP-Server/MaxMSP_Agent/max_mcp.js",
 										"parameter_enable" : 0
 									}
 ,
-									"text" : "js max_mcp.js",
+									"text" : "js /Volumes/RecordBoxNVMe/ReturnToTheSource/MaxMSP-MCP-Server/MaxMSP_Agent/max_mcp.js",
 									"varname" : "maxmcpid-144"
 								}
 
@@ -494,7 +497,7 @@
 , 							{
 								"patchline" : 								{
 									"destination" : [ "obj-2", 0 ],
-									"midpoints" : [ 1089.3125, 828.0, 678.0, 828.0, 678.0, 201.0, 701.249986886978149, 201.0 ],
+									"midpoints" : [ 1161.3125, 828.0, 678.0, 828.0, 678.0, 201.0, 701.249986886978149, 201.0 ],
 									"source" : [ "obj-7", 1 ]
 								}
 
@@ -502,7 +505,7 @@
 , 							{
 								"patchline" : 								{
 									"destination" : [ "obj-3", 0 ],
-									"midpoints" : [ 1111.3125, 732.0, 1032.0, 732.0, 1032.0, 687.0, 875.125, 687.0 ],
+									"midpoints" : [ 1255.3125, 732.0, 1032.0, 732.0, 1032.0, 687.0, 875.125, 687.0 ],
 									"source" : [ "obj-7", 2 ]
 								}
 
@@ -533,7 +536,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 1372.0, 719.0 ],
+						"rect" : [ 0.0, 26.0, 922.0, 747.0 ],
 						"gridsize" : [ 15.0, 15.0 ],
 						"showontab" : 2,
 						"boxes" : [ 							{
