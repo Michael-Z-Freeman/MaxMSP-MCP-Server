@@ -1,6 +1,6 @@
 
 autowatch = 1; // 1
-inlets = 1; // inlet 0: network messages
+inlets = 2; // inlet 0: network messages, inlet 1: console messages
 outlets = 4; // For status, responses, etc.
 
 var p = this.patcher
@@ -9,6 +9,7 @@ var boxes = [];
 var lines = [];
 var connection_count = 0;
 var MAX_CONNECTIONS = 500;
+var console_messages = []; // Buffer for console messages
 
 function safe_parse_json(str) {
     try {
@@ -28,8 +29,35 @@ function split_long_string(inString, maxLength) {
     return result;
 }
 
+// Handler for inlet 1 - captures console messages
+function msg_int(val) {
+    if (inlet == 1) {
+        console_messages.push({type: "int", value: val, timestamp: Date.now()});
+    }
+}
+
+function msg_float(val) {
+    if (inlet == 1) {
+        console_messages.push({type: "float", value: val, timestamp: Date.now()});
+    }
+}
+
+function list() {
+    if (inlet == 1) {
+        var args = arrayfromargs(arguments);
+        console_messages.push({type: "list", value: args, timestamp: Date.now()});
+    }
+}
+
 // Called when a message arrives at inlet 0 (from [udpreceive] or similar)
 function anything() {
+    // If this is from inlet 1, store as console message
+    if (inlet == 1) {
+        var msg = arrayfromargs(messagename, arguments);
+        console_messages.push({type: messagename, value: msg, timestamp: Date.now()});
+        return;
+    }
+
     var msg = arrayfromargs(messagename, arguments).join(" ");
     var data = safe_parse_json(msg);
     if (!data) {
@@ -124,6 +152,13 @@ function anything() {
         case "set_number":
             if (data.varname && data.num) {
                 set_number(data.varname, data.num);
+            }
+            break;
+        case "get_max_console_messages":
+            if (data.request_id) {
+                get_max_console_messages(data.request_id);
+            } else {
+                outlet(0, "error", "Missing request_id for get_max_console_messages");
             }
             break;
         default:
@@ -427,6 +462,20 @@ function get_object_attributes(request_id, var_name) {
         outlet(1, "response", split_long_string(JSON.stringify(results, null, 0), 2500));
     } catch (e) {
         var results = {"request_id": request_id, "results": {"error": "Failed to get attributes: " + e.message}}
+        outlet(1, "response", JSON.stringify(results, null, 0));
+    }
+}
+
+function get_max_console_messages(request_id) {
+    try {
+        // Copy the console messages and clear the buffer
+        var messages = console_messages.slice();
+        console_messages = [];
+
+        var results = {"request_id": request_id, "results": messages}
+        outlet(1, "response", JSON.stringify(results, null, 0));
+    } catch (e) {
+        var results = {"request_id": request_id, "results": {"error": "Failed to get console messages: " + e.message}}
         outlet(1, "response", JSON.stringify(results, null, 0));
     }
 }

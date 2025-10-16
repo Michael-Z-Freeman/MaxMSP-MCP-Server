@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 34.0, 93.0, 922.0, 773.0 ],
+		"rect" : [ 34.0, 121.0, 1372.0, 745.0 ],
 		"gridsize" : [ 15.0, 15.0 ],
 		"showrootpatcherontab" : 0,
 		"showontab" : 0,
@@ -76,22 +76,10 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 34.0, 119.0, 922.0, 747.0 ],
+						"rect" : [ 34.0, 147.0, 1372.0, 719.0 ],
 						"gridsize" : [ 15.0, 15.0 ],
 						"showontab" : 2,
 						"boxes" : [ 							{
-								"box" : 								{
-									"id" : "obj-5",
-									"maxclass" : "newobj",
-									"numinlets" : 0,
-									"numoutlets" : 0,
-									"patching_rect" : [ 372.569999999999993, 473.949999999999989, 29.0, 22.0 ],
-									"text" : "fred",
-									"varname" : "obj-9"
-								}
-
-							}
-, 							{
 								"box" : 								{
 									"id" : "obj-1",
 									"linecount" : 2,
@@ -132,16 +120,17 @@
 									"color" : [ 0.988235294117647, 0.745098039215686, 0.388235294117647, 1.0 ],
 									"filename" : "max_mcp_v8_add_on.js",
 									"id" : "obj-3",
+									"linecount" : 3,
 									"maxclass" : "newobj",
 									"numinlets" : 1,
 									"numoutlets" : 2,
 									"outlettype" : [ "", "" ],
-									"patching_rect" : [ 865.625, 700.0, 155.0, 22.0 ],
+									"patching_rect" : [ 825.0, 694.0, 503.0, 49.0 ],
 									"saved_object_attributes" : 									{
 										"parameter_enable" : 0
 									}
 ,
-									"text" : "v8 max_mcp_v8_add_on.js",
+									"text" : "v8 /Volumes/RecordBoxNVMe/ReturnToTheSource/MaxMSP-MCP-Server/MaxMSP_Agent/max_mcp_v8_add_on.js",
 									"textfile" : 									{
 										"filename" : "max_mcp_v8_add_on.js",
 										"flags" : 0,
@@ -383,19 +372,26 @@
 , 							{
 								"box" : 								{
 									"color" : [ 0.905882352941176, 0.709803921568627, 0.341176470588235, 1.0 ],
+									"filename" : "max_mcp.js",
 									"id" : "obj-7",
 									"linecount" : 3,
 									"maxclass" : "newobj",
 									"numinlets" : 1,
 									"numoutlets" : 4,
 									"outlettype" : [ "", "", "", "" ],
-									"patching_rect" : [ 1057.8125, 700.0, 301.0, 49.0 ],
+									"patching_rect" : [ 1078.0, 771.875, 301.0, 49.0 ],
 									"saved_object_attributes" : 									{
-										"filename" : "/Volumes/RecordBoxNVMe/ReturnToTheSource/MaxMSP-MCP-Server/MaxMSP_Agent/max_mcp.js",
 										"parameter_enable" : 0
 									}
 ,
-									"text" : "js /Volumes/RecordBoxNVMe/ReturnToTheSource/MaxMSP-MCP-Server/MaxMSP_Agent/max_mcp.js",
+									"text" : "v8 /Volumes/RecordBoxNVMe/ReturnToTheSource/MaxMSP-MCP-Server/MaxMSP_Agent/max_mcp.js",
+									"textfile" : 									{
+										"filename" : "max_mcp.js",
+										"flags" : 0,
+										"embed" : 0,
+										"autowatch" : 1
+									}
+,
 									"varname" : "maxmcpid-144"
 								}
 
@@ -468,7 +464,7 @@
 , 							{
 								"patchline" : 								{
 									"destination" : [ "obj-2", 0 ],
-									"midpoints" : [ 1011.125, 732.0, 678.0, 732.0, 678.0, 201.0, 701.249986886978149, 201.0 ],
+									"midpoints" : [ 1318.5, 753.0, 678.0, 753.0, 678.0, 201.0, 701.249986886978149, 201.0 ],
 									"source" : [ "obj-3", 1 ]
 								}
 
@@ -497,7 +493,7 @@
 , 							{
 								"patchline" : 								{
 									"destination" : [ "obj-2", 0 ],
-									"midpoints" : [ 1161.3125, 828.0, 678.0, 828.0, 678.0, 201.0, 701.249986886978149, 201.0 ],
+									"midpoints" : [ 1181.5, 828.0, 678.0, 828.0, 678.0, 201.0, 701.249986886978149, 201.0 ],
 									"source" : [ "obj-7", 1 ]
 								}
 
@@ -505,7 +501,7 @@
 , 							{
 								"patchline" : 								{
 									"destination" : [ "obj-3", 0 ],
-									"midpoints" : [ 1255.3125, 732.0, 1032.0, 732.0, 1032.0, 687.0, 875.125, 687.0 ],
+									"midpoints" : [ 1275.5, 851.2734375, 810.0, 851.2734375, 810.0, 690.0, 834.5, 690.0 ],
 									"source" : [ "obj-7", 2 ]
 								}
 
@@ -536,7 +532,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 922.0, 747.0 ],
+						"rect" : [ 0.0, 26.0, 1372.0, 719.0 ],
 						"gridsize" : [ 15.0, 15.0 ],
 						"showontab" : 2,
 						"boxes" : [ 							{
@@ -3835,8 +3831,6 @@
 									"saved_object_attributes" : 									{
 										"autostart" : 0,
 										"defer" : 0,
-										"node_bin_path" : "",
-										"npm_bin_path" : "",
 										"watch" : 0
 									}
 ,

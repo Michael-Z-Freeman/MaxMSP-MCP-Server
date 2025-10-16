@@ -29,7 +29,7 @@
 					"maxclass" : "newobj",
 					"numinlets" : 4,
 					"numoutlets" : 0,
-					"patching_rect" : [ 585.0, 134.0, 50.5, 22.0 ],
+					"patching_rect" : [ 685.0, 192.0, 50.5, 22.0 ],
 					"text" : "bgcolor"
 				}
 
@@ -42,7 +42,7 @@
 					"numoutlets" : 2,
 					"outlettype" : [ "", "float" ],
 					"parameter_enable" : 0,
-					"patching_rect" : [ 516.0, 60.0, 128.0, 32.0 ],
+					"patching_rect" : [ 728.0, 111.0, 128.0, 32.0 ],
 					"saturation" : 1.0
 				}
 
@@ -167,14 +167,16 @@
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "", "" ],
-					"patching_rect" : [ 66.0, 60.0, 168.0, 22.0 ],
+					"patching_rect" : [ 66.0, 60.0, 639.0, 22.0 ],
 					"saved_object_attributes" : 					{
 						"autostart" : 0,
 						"defer" : 0,
+						"node_bin_path" : "",
+						"npm_bin_path" : "",
 						"watch" : 0
 					}
 ,
-					"text" : "node.script max_mcp_node.js",
+					"text" : "node.script /Volumes/RecordBoxNVMe/ReturnToTheSource/MaxMSP-MCP-Server/MaxMSP_Agent/max_mcp_node.js",
 					"textfile" : 					{
 						"filename" : "max_mcp_node.js",
 						"flags" : 0,
