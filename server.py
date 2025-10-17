@@ -1,7 +1,9 @@
 # server.py
 from mcp.server.fastmcp import FastMCP, Context
-from contextlib import asynccontextmanager
 import asyncio
+import signal
+import threading
+from contextlib import asynccontextmanager
 import socketio
 
 from typing import Any
@@ -42,6 +44,73 @@ INCLUDE_TAGGED_DEFAULT = os.environ.get("MAXMCP_INCLUDE_TAGGED", "").lower() in 
     "yes",
     "on",
 }
+
+try:
+    PARENT_WATCHDOG_INTERVAL = max(
+        0.5, float(os.environ.get("MAXMCP_PARENT_POLL_SECONDS", "2.0"))
+    )
+except ValueError:
+    PARENT_WATCHDOG_INTERVAL = 2.0
+
+
+def _is_parent_alive(parent_pid: int) -> bool:
+    """Check if the original parent process is still alive."""
+    if parent_pid <= 1:
+        return False
+
+    current_ppid = os.getppid()
+    if current_ppid <= 1:
+        return False
+    if current_ppid == parent_pid:
+        return True
+
+    if os.name == "posix":
+        try:
+            os.kill(parent_pid, 0)
+        except ProcessLookupError:
+            return False
+        except PermissionError:
+            return True
+    return True
+
+
+def _start_parent_exit_watchdog() -> Optional[threading.Event]:
+    """Trigger a graceful shutdown when the launching process exits."""
+    if os.environ.get("MAXMCP_DISABLE_PARENT_WATCHDOG", "").lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }:
+        return None
+
+    parent_pid = os.getppid()
+    if parent_pid <= 1:
+        return None
+
+    stop_event = threading.Event()
+
+    def _watch():
+        while not stop_event.wait(PARENT_WATCHDOG_INTERVAL):
+            if not _is_parent_alive(parent_pid):
+                logging.info(
+                    "Detected parent process (%s) exit; shutting down server.", parent_pid
+                )
+                try:
+                    signal.raise_signal(signal.SIGINT)
+                except (AttributeError, RuntimeError, ValueError):
+                    os._exit(0)  # Fallback: immediate exit if signals unavailable
+                break
+
+    thread = threading.Thread(
+        target=_watch, name="maxmcp-parent-watchdog", daemon=True
+    )
+    thread.start()
+    return stop_event
+
+
+# Store to allow clean shutdown of the watchdog
+_parent_watchdog_stop_event: Optional[threading.Event] = None
 
 
 def resolve_patch_path(patch_path: Optional[str]) -> Optional[Path]:
@@ -603,4 +672,9 @@ async def get_max_console_messages(ctx: Context) -> list:
 
 
 if __name__ == "__main__":
-    mcp.run()
+    try:
+        _parent_watchdog_stop_event = _start_parent_exit_watchdog()
+        mcp.run()
+    finally:
+        if _parent_watchdog_stop_event:
+            _parent_watchdog_stop_event.set()
