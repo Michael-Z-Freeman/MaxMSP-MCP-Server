@@ -97,7 +97,7 @@ def _start_parent_exit_watchdog() -> Optional[threading.Event]:
                     "Detected parent process (%s) exit; shutting down server.", parent_pid
                 )
                 try:
-                    signal.raise_signal(signal.SIGINT)
+                    os.kill(os.getpid(), signal.SIGINT)
                 except (AttributeError, RuntimeError, ValueError):
                     os._exit(0)  # Fallback: immediate exit if signals unavailable
                 break
