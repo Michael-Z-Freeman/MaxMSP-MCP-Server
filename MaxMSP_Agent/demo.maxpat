@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 34.0, 121.0, 1372.0, 745.0 ],
+		"rect" : [ 34.0, 93.0, 1009.0, 773.0 ],
 		"gridsize" : [ 15.0, 15.0 ],
 		"showrootpatcherontab" : 0,
 		"showontab" : 0,
@@ -45,7 +45,7 @@
 					"color" : [ 0.865085244178772, 0.586760640144348, 0.054060600697994, 1.0 ],
 					"id" : "obj-7",
 					"maxclass" : "newobj",
-					"numinlets" : 1,
+					"numinlets" : 2,
 					"numoutlets" : 4,
 					"outlettype" : [ "", "", "", "" ],
 					"patching_rect" : [ 568.0, 256.0, 85.0, 22.0 ],
@@ -76,7 +76,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 34.0, 147.0, 1372.0, 719.0 ],
+						"rect" : [ 34.0, 119.0, 1009.0, 747.0 ],
 						"gridsize" : [ 15.0, 15.0 ],
 						"showontab" : 2,
 						"boxes" : [ 							{
@@ -89,7 +89,7 @@
 									"outlettype" : [ "", "", "int" ],
 									"patching_rect" : [ 1172.0, 600.0, 193.0, 35.0 ],
 									"text" : "console @patcherfilter thispatcher @showonlyerrors 0",
-									"varname" : "obj-8"
+									"varname" : "maxmcpid-777"
 								}
 
 							}
@@ -110,7 +110,7 @@
 									"offset" : [ 0.0, 0.0 ],
 									"outlettype" : [ "", "", "" ],
 									"patching_rect" : [ 691.749986886978149, 204.166658878326416, 445.0, 452.0 ],
-									"varname" : "obj-0",
+									"varname" : "maxmcpid-888",
 									"viewvisibility" : 1
 								}
 
@@ -376,7 +376,7 @@
 									"id" : "obj-7",
 									"linecount" : 3,
 									"maxclass" : "newobj",
-									"numinlets" : 1,
+									"numinlets" : 2,
 									"numoutlets" : 4,
 									"outlettype" : [ "", "", "", "" ],
 									"patching_rect" : [ 1078.0, 771.875, 301.0, 49.0 ],
@@ -532,7 +532,7 @@
 						}
 ,
 						"classnamespace" : "box",
-						"rect" : [ 0.0, 26.0, 1372.0, 719.0 ],
+						"rect" : [ 0.0, 26.0, 1009.0, 747.0 ],
 						"gridsize" : [ 15.0, 15.0 ],
 						"showontab" : 2,
 						"boxes" : [ 							{
@@ -3831,6 +3831,8 @@
 									"saved_object_attributes" : 									{
 										"autostart" : 0,
 										"defer" : 0,
+										"node_bin_path" : "",
+										"npm_bin_path" : "",
 										"watch" : 0
 									}
 ,

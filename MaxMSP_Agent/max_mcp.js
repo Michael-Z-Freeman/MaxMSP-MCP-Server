@@ -75,14 +75,14 @@ function anything() {
             break;
         case "get_objects_in_patch":
             if (data.request_id) {
-                get_objects_in_patch(data.request_id);
+                get_objects_in_patch(data.request_id, data.include_tagged || false);
             } else {
                 outlet(0, "error", "Missing request_id for get_objects_in_patch");
             }
             break;
         case "get_objects_in_selected":
             if (data.request_id) {
-                get_objects_in_selected(data.request_id);
+                get_objects_in_selected(data.request_id, data.include_tagged || false);
             } else {
                 outlet(0, "error", "Missing request_id for get_objects_in_selected");
             }
@@ -275,7 +275,7 @@ function set_number(varname, num) {
 // ========================================
 // fetch request:
 
-function get_objects_in_patch(request_id) {
+function get_objects_in_patch(request_id, include_tagged) {
 
 	var p = this.patcher
     obj_count = 0;
@@ -297,7 +297,7 @@ function get_objects_in_patch(request_id) {
             if (obj.maxclass == "js" || obj.maxclass == "node.script" || obj.maxclass == "v8") {
                 return;
             }
-            collect_objects(obj);
+            collect_objects(obj, include_tagged);
         });
     } catch (e) {
         outlet(0, "error", "JavaScript error during patch analysis: " + e.message);
@@ -321,7 +321,7 @@ function get_objects_in_patch(request_id) {
     outlet(2, "add_boxtext", request_id, JSON.stringify(patcher_dict, null, 0));
 }
 
-function get_objects_in_selected(request_id) {
+function get_objects_in_selected(request_id, include_tagged) {
 
 	var p = this.patcher
     obj_count = 0;
@@ -343,7 +343,7 @@ function get_objects_in_selected(request_id) {
             if (obj.maxclass == "js" || obj.maxclass == "node.script" || obj.maxclass == "v8") {
                 return;
             }
-            collect_objects(obj);
+            collect_objects(obj, include_tagged);
         }, function (obj) {
             return obj.selected;
         });
@@ -369,10 +369,10 @@ function get_objects_in_selected(request_id) {
     outlet(2, "add_boxtext", request_id, JSON.stringify(patcher_dict, null, 0));
 }
 
-function collect_objects(obj) {
+function collect_objects(obj, include_tagged) {
     try {
         // Skip objects with potentially dangerous varnmes
-        if (obj.varname && obj.varname.substring(0, 8) == "maxmcpid"){
+        if (!include_tagged && obj.varname && obj.varname.substring(0, 8) == "maxmcpid"){
             return;
         }
         if (!obj.varname){
