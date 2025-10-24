@@ -9,6 +9,7 @@ var boxes = [];
 var lines = [];
 var connection_count = 0;
 var MAX_CONNECTIONS = 500;
+var MAX_OBJECTS = 1; // disable object cap while testing stability with v8
 var console_messages = []; // Buffer for console messages
 
 function safe_parse_json(str) {
@@ -283,18 +284,12 @@ function get_objects_in_patch(request_id, include_tagged) {
     lines = [];
     connection_count = 0;
 
-    // Much more aggressive safety limits to prevent JavaScript engine crashes
-    var MAX_OBJECTS = 200;
     var object_limit_reached = false;
 
     try {
         p.applydeep(function(obj) {
-            if (obj_count >= MAX_OBJECTS) {
+            if (MAX_OBJECTS > 0 && obj_count >= MAX_OBJECTS) {
                 object_limit_reached = true;
-                return;
-            }
-            // Skip complex objects that might cause crashes
-            if (obj.maxclass == "js" || obj.maxclass == "node.script" || obj.maxclass == "v8") {
                 return;
             }
             collect_objects(obj, include_tagged);
@@ -308,7 +303,7 @@ function get_objects_in_patch(request_id, include_tagged) {
     patcher_dict["boxes"] = boxes;
     patcher_dict["lines"] = lines;
 
-    if (object_limit_reached) {
+    if (object_limit_reached && MAX_OBJECTS > 0) {
         patcher_dict["warning"] = "Safety limit reached (" + MAX_OBJECTS + " objects, " + MAX_CONNECTIONS + " connections). Analysis truncated to prevent crashes.";
         outlet(0, "warning", "Large/complex patch detected - analysis limited to " + MAX_OBJECTS + " objects to prevent crashes");
     }
@@ -329,18 +324,12 @@ function get_objects_in_selected(request_id, include_tagged) {
     lines = [];
     connection_count = 0;
 
-    // Much more aggressive safety limits to prevent JavaScript engine crashes
-    var MAX_OBJECTS = 200;
     var object_limit_reached = false;
 
     try {
         p.applydeepif(function(obj) {
-            if (obj_count >= MAX_OBJECTS) {
+            if (MAX_OBJECTS > 0 && obj_count >= MAX_OBJECTS) {
                 object_limit_reached = true;
-                return;
-            }
-            // Skip complex objects that might cause crashes
-            if (obj.maxclass == "js" || obj.maxclass == "node.script" || obj.maxclass == "v8") {
                 return;
             }
             collect_objects(obj, include_tagged);
@@ -356,7 +345,7 @@ function get_objects_in_selected(request_id, include_tagged) {
     patcher_dict["boxes"] = boxes;
     patcher_dict["lines"] = lines;
 
-    if (object_limit_reached) {
+    if (object_limit_reached && MAX_OBJECTS > 0) {
         patcher_dict["warning"] = "Safety limit reached (" + MAX_OBJECTS + " objects, " + MAX_CONNECTIONS + " connections). Selection analysis truncated to prevent crashes.";
         outlet(0, "warning", "Large/complex selection detected - analysis limited to " + MAX_OBJECTS + " objects to prevent crashes");
     }
@@ -379,6 +368,12 @@ function collect_objects(obj, include_tagged) {
             obj.varname = "obj-" + obj_count;
         }
         obj_count += 1;
+
+        if ((obj_count % 200) === 0) {
+            var progress_msg = "collect_objects processed " + obj_count + " objects; latest maxclass=" + (obj.maxclass || "unknown") + " varname=" + obj.varname;
+            post(progress_msg);
+            outlet(3, "console_message", "v8: " + progress_msg);
+        }
 
         // Safely collect patchcords with connection limit
         try {

@@ -43,6 +43,11 @@ function add_boxtext(request_id, data){
     var patcher_dict = safe_parse_json(data);
     var p = this.patcher;
 
+    if (!patcher_dict || !Array.isArray(patcher_dict.boxes)) {
+        outlet(0, "error", "add_boxtext: missing boxes in patcher_dict for request " + request_id);
+        return;
+    }
+
     patcher_dict.boxes.forEach(function (b) {
         var obj = p.getnamed(b.box.varname);
         if (obj) {
@@ -53,5 +58,4 @@ function add_boxtext(request_id, data){
     var results = {"request_id": request_id, "results": patcher_dict}
     outlet(1, "response", split_long_string(JSON.stringify(results, null, 0), 2500));
 }
-
 

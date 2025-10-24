@@ -155,7 +155,7 @@ class MaxMSPConnection:
         await self.sio.emit("command", cmd, namespace=self.namespace)
         logging.info(f"Sent to MaxMSP: {cmd}")
 
-    async def send_request(self, payload: dict, timeout=5.0):
+    async def send_request(self, payload: dict, timeout=60.0):
         """Send a fetch request to MaxMSP with enhanced error handling."""
         request_id = str(uuid.uuid4())
         future = asyncio.get_event_loop().create_future()
